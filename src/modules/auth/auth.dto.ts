@@ -10,7 +10,7 @@ export interface RegisterDTO {
     gender: GENDER
 }
 
-export interface SendOtpDTO {
+export interface VerifyAccountDTO {
     email: string
     otp: string
 }
@@ -18,4 +18,8 @@ export interface SendOtpDTO {
 export interface LoginDTO {
     email: string
     password: string
+}
+
+export interface ResendOtpDTO {
+    email: string
 }

@@ -9,7 +9,6 @@ class User {
     credentialsUpdatedAt;
     isVerified;
     phoneNumber;
-    dob;
     otp;
     otpExpire;
     fullName;

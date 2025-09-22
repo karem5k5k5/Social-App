@@ -1,18 +1,15 @@
 import nodemailer from "nodemailer"
-export const sendMail = async (to: string, subject: string, html: string) => {
+import { devConfig } from "../../config/env/dev.config"
+import { MailOptions } from "nodemailer/lib/sendmail-transport"
+export const sendMail = async (mailOptions: MailOptions) => {
     const transporter = nodemailer.createTransport({
         host: "smtp.gmail.com",
         port: 587,
         auth: {
-            user: process.env.NODEMAILER_EMAIL,
-            pass: process.env.NODEMAILER_PASS
+            user: devConfig.NODEMAILER_EMAIL,
+            pass: devConfig.NODEMAILER_PASS
         }
     })
 
-    await transporter.sendMail({
-        from: `'Saraha App' <${process.env.NODEMAILER_EMAIL}>`,
-        to,
-        subject,
-        html
-    })
+    await transporter.sendMail(mailOptions)
 }

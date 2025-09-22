@@ -8,7 +8,6 @@ export class User {
     credentialsUpdatedAt!: Date
     isVerified!: boolean
     phoneNumber!: string
-    dob!: Date
     otp!: string
     otpExpire!: Date
     fullName!: string

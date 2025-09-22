@@ -1,6 +1,8 @@
 import { Schema } from "mongoose";
 import { IUser } from "../../../utils/common/interfaces";
 import { GENDER, SYS_ROLE, USER_AGENT } from "../../../utils/common/enums";
+import { sendMail } from "../../../utils/mail";
+import { devConfig } from "../../../config/env/dev.config";
 
 export const userSchema = new Schema<IUser>({
     firstName: {
@@ -33,7 +35,6 @@ export const userSchema = new Schema<IUser>({
             return true
         }
     },
-    dob: Date,
     credentialsUpdatedAt: Date,
     phoneNumber: String,
     otp: String,
@@ -59,10 +60,24 @@ export const userSchema = new Schema<IUser>({
 
 }, { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } })
 
+// virtual field
 userSchema.virtual("fullName").get(function () {
     return this.firstName + " " + this.lastName
 }).set(function (value: string) {
     const [fName, lName] = value.split(" ")
     this.firstName = fName as string
     this.lastName = lName as string
+})
+
+// hooks - mongoose middlewares
+userSchema.pre("save", async function () {
+    if (this.userAgent != USER_AGENT.google && this.isNew == true) {
+        // send mail
+        await sendMail({
+            from: `Social App <${devConfig.NODEMAILER_EMAIL}>`,
+            to: this.email,
+            subject: "Verify Account",
+            html: `<p>your otp to verify account is <b>${this.otp}</b></p>`
+        })
+    }
 })

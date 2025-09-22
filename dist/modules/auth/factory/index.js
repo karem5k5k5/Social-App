@@ -7,12 +7,11 @@ const otp_1 = require("../../../utils/otp");
 const entity_1 = require("../entity");
 // factory design pattern
 class AuthFactoryService {
-    register(registerDTO) {
+    async register(registerDTO) {
         const user = new entity_1.User();
         user.fullName = registerDTO.fullName;
         user.email = registerDTO.email;
-        user.password = (0, hash_1.hashPassword)(registerDTO.password);
-        user.dob = registerDTO.dob;
+        user.password = await (0, hash_1.hashPassword)(registerDTO.password);
         user.phoneNumber = registerDTO.phoneNumber;
         user.gender = registerDTO.gender;
         user.role = enums_1.SYS_ROLE.user;

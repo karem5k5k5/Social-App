@@ -1,4 +1,4 @@
-import { Model, MongooseUpdateQueryOptions, ProjectionType, QueryOptions, RootFilterQuery } from "mongoose";
+import { Model, MongooseUpdateQueryOptions, ProjectionType, QueryOptions, RootFilterQuery, UpdateQuery } from "mongoose";
 
 // repository design pattern
 export abstract class AbstractRepository<T> {
@@ -13,11 +13,15 @@ export abstract class AbstractRepository<T> {
         return await this.model.findOne(filter, projection, options)
     }
 
-    async updateOne(filter: RootFilterQuery<T>, update: Partial<T>, options?: MongooseUpdateQueryOptions<T>) {
+    async updateOne(filter: RootFilterQuery<T>, update: UpdateQuery<T>, options?: MongooseUpdateQueryOptions<T>) {
         return await this.model.updateOne(filter, update, options)
     }
 
     async deleteOne(filter: RootFilterQuery<T>) {
         await this.model.deleteOne(filter)
+    }
+
+    async getOneAndUpdate(filter: RootFilterQuery<T>, update?: UpdateQuery<T>, options?: QueryOptions<T>) {
+        return await this.model.findOneAndUpdate(filter, update, options)
     }
 }

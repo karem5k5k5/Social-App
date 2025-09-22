@@ -20,5 +20,8 @@ class AbstractRepository {
     async deleteOne(filter) {
         await this.model.deleteOne(filter);
     }
+    async getOneAndUpdate(filter, update, options) {
+        return await this.model.findOneAndUpdate(filter, update, options);
+    }
 }
 exports.AbstractRepository = AbstractRepository;

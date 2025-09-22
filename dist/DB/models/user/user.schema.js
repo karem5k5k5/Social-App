@@ -3,6 +3,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.userSchema = void 0;
 const mongoose_1 = require("mongoose");
 const enums_1 = require("../../../utils/common/enums");
+const mail_1 = require("../../../utils/mail");
+const dev_config_1 = require("../../../config/env/dev.config");
 exports.userSchema = new mongoose_1.Schema({
     firstName: {
         type: String,
@@ -34,7 +36,6 @@ exports.userSchema = new mongoose_1.Schema({
             return true;
         }
     },
-    dob: Date,
     credentialsUpdatedAt: Date,
     phoneNumber: String,
     otp: String,
@@ -58,10 +59,23 @@ exports.userSchema = new mongoose_1.Schema({
         default: enums_1.USER_AGENT.local
     },
 }, { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } });
+// virtual field
 exports.userSchema.virtual("fullName").get(function () {
     return this.firstName + " " + this.lastName;
 }).set(function (value) {
     const [fName, lName] = value.split(" ");
     this.firstName = fName;
     this.lastName = lName;
+});
+// hooks - mongoose middlewares
+exports.userSchema.pre("save", async function () {
+    if (this.userAgent != enums_1.USER_AGENT.google && this.isNew == true) {
+        // send mail
+        await (0, mail_1.sendMail)({
+            from: `Social App <${dev_config_1.devConfig.NODEMAILER_EMAIL}>`,
+            to: this.email,
+            subject: "Verify Account",
+            html: `<p>your otp to verify account is <b>${this.otp}</b></p>`
+        });
+    }
 });
