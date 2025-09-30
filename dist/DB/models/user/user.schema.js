@@ -45,16 +45,16 @@ exports.userSchema = new mongoose_1.Schema({
         default: false
     },
     role: {
-        type: String,
+        type: Number,
         enum: enums_1.SYS_ROLE,
         default: enums_1.SYS_ROLE.user
     },
     gender: {
-        type: String,
+        type: Number,
         enum: enums_1.GENDER
     },
     userAgent: {
-        type: String,
+        type: Number,
         enum: enums_1.USER_AGENT,
         default: enums_1.USER_AGENT.local
     },

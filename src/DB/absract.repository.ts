@@ -13,6 +13,10 @@ export abstract class AbstractRepository<T> {
         return await this.model.findOne(filter, projection, options)
     }
 
+    async getById(id: any, projection?: ProjectionType<T>, options?: QueryOptions<T>) {
+        return await this.model.findById(id, projection, options)
+    }
+
     async updateOne(filter: RootFilterQuery<T>, update: UpdateQuery<T>, options?: MongooseUpdateQueryOptions<T>) {
         return await this.model.updateOne(filter, update, options)
     }

@@ -1,6 +1,6 @@
 import type { Request, Response } from "express";
 import { LoginDTO, RegisterDTO, ResendOtpDTO, VerifyAccountDTO } from "./auth.dto";
-import { ConflictException, NotAuthorizedException } from "../../utils/errors";
+import { ConflictException, ForbiddenException, UnAuthorizedException } from "../../utils/errors";
 import { UserRepository } from "../../DB/models/user/user.repository";
 import { AuthFactoryService } from "./factory";
 import { sendMail } from "../../utils/mail";
@@ -11,8 +11,8 @@ import { devConfig } from "../../config/env/dev.config";
 import { authProvider } from "./auth.provider";
 
 class AuthService {
-    private userRepository = new UserRepository()
-    private authFactoryService = new AuthFactoryService()
+    private readonly userRepository = new UserRepository()
+    private readonly authFactoryService = new AuthFactoryService()
     constructor() { }
 
     register = async (req: Request, res: Response) => {
@@ -48,16 +48,16 @@ class AuthService {
         // check email
         const user = await this.userRepository.getOne({ email: loginDTO.email })
         if (!user) {
-            throw new NotAuthorizedException("invalid credentials")
+            throw new ForbiddenException("invalid credentials")
         }
         // check passsword
         const isMatch = comparePassword(loginDTO.password, user.password)
         if (!isMatch) {
-            throw new NotAuthorizedException("invalid credentials")
+            throw new ForbiddenException("invalid credentials")
         }
         // check verification
         if (!user.isVerified) {
-            throw new NotAuthorizedException("please verify your account")
+            throw new ForbiddenException("please verify your account")
         }
         // generate token
         const token = generateToken(user.id, { expiresIn: "1h" })
@@ -74,7 +74,7 @@ class AuthService {
         // check for email validation
         const user = await this.userRepository.getOneAndUpdate({ email: resendOtpDTO.email }, { otp, otpExpire })
         if (!user) {
-            throw new NotAuthorizedException("invalid email")
+            throw new UnAuthorizedException("invalid email")
         }
         // send otp
         await sendMail({

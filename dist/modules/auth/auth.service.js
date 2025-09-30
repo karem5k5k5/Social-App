@@ -44,16 +44,16 @@ class AuthService {
         // check email
         const user = await this.userRepository.getOne({ email: loginDTO.email });
         if (!user) {
-            throw new errors_1.NotAuthorizedException("invalid credentials");
+            throw new errors_1.ForbiddenException("invalid credentials");
         }
         // check passsword
         const isMatch = (0, hash_1.comparePassword)(loginDTO.password, user.password);
         if (!isMatch) {
-            throw new errors_1.NotAuthorizedException("invalid credentials");
+            throw new errors_1.ForbiddenException("invalid credentials");
         }
         // check verification
         if (!user.isVerified) {
-            throw new errors_1.NotAuthorizedException("please verify your account");
+            throw new errors_1.ForbiddenException("please verify your account");
         }
         // generate token
         const token = (0, token_1.generateToken)(user.id, { expiresIn: "1h" });
@@ -69,7 +69,7 @@ class AuthService {
         // check for email validation
         const user = await this.userRepository.getOneAndUpdate({ email: resendOtpDTO.email }, { otp, otpExpire });
         if (!user) {
-            throw new errors_1.NotAuthorizedException("invalid email");
+            throw new errors_1.UnAuthorizedException("invalid email");
         }
         // send otp
         await (0, mail_1.sendMail)({

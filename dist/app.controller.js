@@ -5,6 +5,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.bootstrap = bootstrap;
 const auth_controller_1 = __importDefault(require("./modules/auth/auth.controller"));
+const post_controller_1 = __importDefault(require("./modules/post/post.controller"));
 const connection_1 = require("./DB/connection");
 const global_error_handler_1 = require("./utils/global-error-handler");
 function bootstrap(app, express) {
@@ -17,10 +18,11 @@ function bootstrap(app, express) {
     app.use("/auth", auth_controller_1.default);
     // user
     // post
+    app.use("/post", post_controller_1.default);
     // comment
     // message
     // invalid
-    app.use("/{*dummy}", (req, res, next) => {
+    app.use("/{*dummy}", (req, res) => {
         return res.status(404).json({ success: false, message: "invalid router" });
     });
     // middleware - global error handler

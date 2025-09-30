@@ -16,7 +16,13 @@ export class NotFoundException extends AppError {
     }
 }
 
-export class NotAuthorizedException extends AppError {
+export class ForbiddenException extends AppError {
+    constructor(message: string, errorDetails?: object[]) {
+        super(message, 403, errorDetails)
+    }
+}
+
+export class UnAuthorizedException extends AppError {
     constructor(message: string, errorDetails?: object[]) {
         super(message, 401, errorDetails)
     }

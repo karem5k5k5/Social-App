@@ -44,16 +44,16 @@ export const userSchema = new Schema<IUser>({
         default: false
     },
     role: {
-        type: String,
+        type: Number,
         enum: SYS_ROLE,
         default: SYS_ROLE.user
     },
     gender: {
-        type: String,
+        type: Number,
         enum: GENDER
     },
     userAgent: {
-        type: String,
+        type: Number,
         enum: USER_AGENT,
         default: USER_AGENT.local
     },

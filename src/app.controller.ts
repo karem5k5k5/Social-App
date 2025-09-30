@@ -1,5 +1,6 @@
-import { type Express } from "express";
+import { Request, Response, type Express } from "express";
 import authRouter from "./modules/auth/auth.controller"
+import postRouter from "./modules/post/post.controller"
 import { connectDB } from "./DB/connection";
 import { globalErrorHandler } from "./utils/global-error-handler";
 
@@ -15,10 +16,11 @@ export function bootstrap(app: Express, express: any) {
     app.use("/auth", authRouter)
     // user
     // post
+    app.use("/post", postRouter)
     // comment
     // message
     // invalid
-    app.use("/{*dummy}", (req, res, next) => {
+    app.use("/{*dummy}", (req:Request, res:Response) => {
         return res.status(404).json({ success: false, message: "invalid router" })
     })
 

@@ -10,16 +10,16 @@ exports.authProvider = {
         // check user existence
         const user = await userRepository.getOne({ email: veriftAccountDTO.email });
         if (!user) {
-            throw new errors_1.NotAuthorizedException("invalid email");
+            throw new errors_1.ForbiddenException("invalid email");
         }
         // check otp
         if (veriftAccountDTO.otp != user.otp) {
-            throw new errors_1.NotAuthorizedException("invalid otp");
+            throw new errors_1.ForbiddenException("invalid otp");
         }
         // check otp expire
         user.otpExpire = user.otpExpire;
         if (user.otpExpire < new Date()) {
-            throw new errors_1.NotAuthorizedException("expired otp");
+            throw new errors_1.ForbiddenException("expired otp");
         }
         return user;
     }
