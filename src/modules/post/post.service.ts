@@ -2,7 +2,8 @@ import { Request, Response } from "express";
 import { CreatePostDTO } from "./post.dto";
 import { PostFactoryService } from "./factory";
 import { PostRepository } from "../../DB/models/post/post.repository";
-import { NotFoundException } from "../../utils/errors";
+import { NotFoundException, UnAuthorizedException } from "../../utils/errors";
+import { addReactionProvider } from "../../utils/common/providers/addreaction.provider";
 
 export class PostService {
     private readonly postFactoryService = new PostFactoryService()
@@ -24,23 +25,8 @@ export class PostService {
         const { id } = req.params
         const userId = req.user._id
         const { reaction } = req.body
-        // check post existence
-        const post = await this.postRepository.getById(id)
-        if (!post) {
-            throw new NotFoundException("post not found")
-        }
-        // update post
-        const userReactedIndex = post.reactions.findIndex((reaction) => {
-            return reaction.userId.toString() == userId.toString()
-        })
-        if (userReactedIndex == -1) {
-            await this.postRepository.updateOne({ _id: id }, { $push: { reactions: { reaction, userId } } })
-        } else if ([undefined, null, ""].includes(reaction)) {
-            await this.postRepository.updateOne({ _id: id }, { $pull: { reactions: post.reactions[userReactedIndex] } })
-        } else {
-            await this.postRepository.updateOne({ _id: id, "reactions.userId": userId }, { "reactions.$.reaction": reaction })
-        }
-
+        // add reaction - provider
+        await addReactionProvider(this.postRepository, id, userId, reaction)
         // send response
         return res.sendStatus(204)
     }
@@ -53,7 +39,7 @@ export class PostService {
             populate: [
                 { path: "userId", select: "firstName lastName fullName" },
                 { path: "reactions.userId", select: "firstName lastName fullName" },
-                { path: "comments" }
+                { path: "comments", match: { directParentId: null } }
             ]
         })
         if (!post) {
@@ -61,6 +47,24 @@ export class PostService {
         }
         // send response
         return res.status(200).json({ success: true, post })
+    }
+
+    public deletePost = async (req: Request, res: Response) => {
+        // get data from req
+        const { id } = req.params
+        // check post existence
+        const post = await this.postRepository.getById(id)
+        if (!post) {
+            throw new NotFoundException("post not found")
+        }
+        // check user authority
+        if (post.userId.toString() !== req.user._id.toString()) {
+            throw new UnAuthorizedException("you are not authorized to delte this post")
+        }
+        // delete post
+        await this.postRepository.deleteOne({ _id: id })
+        // send response
+        return res.status(200).json({ success: true, message: "post deleted successfully" })
     }
 }
 

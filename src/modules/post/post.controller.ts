@@ -11,6 +11,7 @@ router.use("/:postId/comment", commentRouter)
 // post routes
 router.post("/", isValid(craetePostSchema), isAuthenticated, postService.create)
 router.patch("/:id", isAuthenticated, postService.addReaction)
+router.delete("/:id", isAuthenticated, postService.deletePost)
 // public
 router.get("/:id", postService.getPostById)
 

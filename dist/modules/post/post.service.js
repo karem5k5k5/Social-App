@@ -4,6 +4,7 @@ exports.PostService = void 0;
 const factory_1 = require("./factory");
 const post_repository_1 = require("../../DB/models/post/post.repository");
 const errors_1 = require("../../utils/errors");
+const addreaction_provider_1 = require("../../utils/common/providers/addreaction.provider");
 class PostService {
     postFactoryService = new factory_1.PostFactoryService();
     postRepository = new post_repository_1.PostRepository();
@@ -22,24 +23,8 @@ class PostService {
         const { id } = req.params;
         const userId = req.user._id;
         const { reaction } = req.body;
-        // check post existence
-        const post = await this.postRepository.getById(id);
-        if (!post) {
-            throw new errors_1.NotFoundException("post not found");
-        }
-        // update post
-        const userReactedIndex = post.reactions.findIndex((reaction) => {
-            return reaction.userId.toString() == userId.toString();
-        });
-        if (userReactedIndex == -1) {
-            await this.postRepository.updateOne({ _id: id }, { $push: { reactions: { reaction, userId } } });
-        }
-        else if ([undefined, null, ""].includes(reaction)) {
-            await this.postRepository.updateOne({ _id: id }, { $pull: { reactions: post.reactions[userReactedIndex] } });
-        }
-        else {
-            await this.postRepository.updateOne({ _id: id, "reactions.userId": userId }, { "reactions.$.reaction": reaction });
-        }
+        // add reaction - provider
+        await (0, addreaction_provider_1.addReactionProvider)(this.postRepository, id, userId, reaction);
         // send response
         return res.sendStatus(204);
     };
@@ -51,7 +36,7 @@ class PostService {
             populate: [
                 { path: "userId", select: "firstName lastName fullName" },
                 { path: "reactions.userId", select: "firstName lastName fullName" },
-                { path: "comments" }
+                { path: "comments", match: { directParentId: null } }
             ]
         });
         if (!post) {
@@ -59,6 +44,23 @@ class PostService {
         }
         // send response
         return res.status(200).json({ success: true, post });
+    };
+    deletePost = async (req, res) => {
+        // get data from req
+        const { id } = req.params;
+        // check post existence
+        const post = await this.postRepository.getById(id);
+        if (!post) {
+            throw new errors_1.NotFoundException("post not found");
+        }
+        // check user authority
+        if (post.userId.toString() !== req.user._id.toString()) {
+            throw new errors_1.UnAuthorizedException("you are not authorized to delte this post");
+        }
+        // delete post
+        await this.postRepository.deleteOne({ _id: id });
+        // send response
+        return res.status(200).json({ success: true, message: "post deleted successfully" });
     };
 }
 exports.PostService = PostService;

@@ -15,6 +15,7 @@ router.use("/:postId/comment", comment_controller_1.default);
 // post routes
 router.post("/", (0, validation_middleware_1.isValid)(post_validation_1.craetePostSchema), auth_middleware_1.isAuthenticated, post_service_1.default.create);
 router.patch("/:id", auth_middleware_1.isAuthenticated, post_service_1.default.addReaction);
+router.delete("/:id", auth_middleware_1.isAuthenticated, post_service_1.default.deletePost);
 // public
 router.get("/:id", post_service_1.default.getPostById);
 exports.default = router;

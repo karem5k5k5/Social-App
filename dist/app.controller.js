@@ -6,6 +6,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.bootstrap = bootstrap;
 const auth_controller_1 = __importDefault(require("./modules/auth/auth.controller"));
 const post_controller_1 = __importDefault(require("./modules/post/post.controller"));
+const comment_controller_1 = __importDefault(require("./modules/comment/comment.controller"));
 const connection_1 = require("./DB/connection");
 const global_error_handler_1 = require("./utils/global-error-handler");
 function bootstrap(app, express) {
@@ -16,10 +17,10 @@ function bootstrap(app, express) {
     // routes
     // auth
     app.use("/auth", auth_controller_1.default);
-    // user
     // post
     app.use("/post", post_controller_1.default);
     // comment
+    app.use("/comment", comment_controller_1.default);
     // message
     // invalid
     app.use("/{*dummy}", (req, res) => {

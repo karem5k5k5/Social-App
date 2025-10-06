@@ -5,6 +5,7 @@ class Comment {
     userId;
     postId;
     parentIds;
+    directParentId;
     content;
     attachment;
     reactions;

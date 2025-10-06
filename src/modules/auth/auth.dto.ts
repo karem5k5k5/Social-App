@@ -5,7 +5,6 @@ export interface RegisterDTO {
     email: string
     password: string
     phoneNumber?: string
-    dob?: Date
     fullName: string
     gender: GENDER
 }
@@ -22,4 +21,10 @@ export interface LoginDTO {
 
 export interface ResendOtpDTO {
     email: string
+}
+
+export interface ResetPasswordDTO {
+    email: string
+    otp: string
+    newPassword: string
 }

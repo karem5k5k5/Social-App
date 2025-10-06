@@ -1,0 +1,25 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.addReactionProvider = void 0;
+const errors_1 = require("../../errors");
+const addReactionProvider = async (repo, id, userId, reaction) => {
+    // check post existence
+    const content = await repo.getById(id);
+    if (!content) {
+        throw new errors_1.NotFoundException("content not found");
+    }
+    // update content
+    const userReactedIndex = content.reactions.findIndex((reaction) => {
+        return reaction.userId.toString() == userId.toString();
+    });
+    if (userReactedIndex == -1) {
+        await repo.updateOne({ _id: id }, { $push: { reactions: { reaction, userId } } });
+    }
+    else if ([undefined, null, ""].includes(reaction)) {
+        await repo.updateOne({ _id: id }, { $pull: { reactions: content.reactions[userReactedIndex] } });
+    }
+    else {
+        await repo.updateOne({ _id: id, "reactions.userId": userId }, { "reactions.$.reaction": reaction });
+    }
+};
+exports.addReactionProvider = addReactionProvider;

@@ -10,6 +10,7 @@ export class CommentFactoryService {
         newComment.userId = user._id
         newComment.postId = post._id
         newComment.parentIds = comment ? [...comment.parentIds, comment._id] : []
+        newComment.directParentId = comment ? comment._id : null
         newComment.reactions = []
 
         return newComment

@@ -1,10 +1,10 @@
 import type { Request, Response } from "express";
-import { LoginDTO, RegisterDTO, ResendOtpDTO, VerifyAccountDTO } from "./auth.dto";
-import { ConflictException, ForbiddenException, UnAuthorizedException } from "../../utils/errors";
+import { LoginDTO, RegisterDTO, ResendOtpDTO, ResetPasswordDTO, VerifyAccountDTO } from "./auth.dto";
+import { ConflictException, ForbiddenException, NotFoundException, UnAuthorizedException } from "../../utils/errors";
 import { UserRepository } from "../../DB/models/user/user.repository";
 import { AuthFactoryService } from "./factory";
 import { sendMail } from "../../utils/mail";
-import { comparePassword } from "../../utils/hash";
+import { comparePassword, hashPassword } from "../../utils/hash";
 import { generateToken } from "../../utils/token";
 import { generateExpiryDate, generateOTP } from "../../utils/otp";
 import { devConfig } from "../../config/env/dev.config";
@@ -85,6 +85,32 @@ class AuthService {
         })
         // send response
         return res.status(200).json({ success: true, message: "new otp sent successfully" })
+    }
+
+    resetPassword = async (req: Request, res: Response)=>{
+        // get data from req
+        const resetPasswordDTO:ResetPasswordDTO = req.body
+        // check user existence
+        const user = await this.userRepository.getOne({email:resetPasswordDTO.email})
+        if (!user){
+            throw new NotFoundException("user not found")
+        }
+        // check otp & otp expiry date
+        if (user.otp != resetPasswordDTO.otp){
+            throw new ForbiddenException("invalid otp")
+        }
+        if (Number(user.otpExpire) < Date.now()){
+            throw new ForbiddenException("expired otp")
+        }
+        // update user
+        user.password = await hashPassword(resetPasswordDTO.newPassword)
+        delete user.otp
+        delete user.otpExpire
+        user.credentialsUpdatedAt = new Date(Date.now())
+        // save user to db
+        await this.userRepository.create(user)
+        // send reponse
+        return res.status(200).json({ success: true, message: "reset password successfully" })
     }
 }
 

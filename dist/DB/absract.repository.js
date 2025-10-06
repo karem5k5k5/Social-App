@@ -20,11 +20,17 @@ class AbstractRepository {
     async updateOne(filter, update, options) {
         return await this.model.updateOne(filter, update, options);
     }
-    async deleteOne(filter) {
-        await this.model.deleteOne(filter);
+    async deleteOne(filter, options) {
+        return await this.model.deleteOne(filter, options);
+    }
+    async deleteMany(filter, options) {
+        return await this.model.deleteMany(filter, options);
     }
     async getOneAndUpdate(filter, update, options) {
         return await this.model.findOneAndUpdate(filter, update, options);
+    }
+    async getOneAndDelete(filter, options) {
+        return await this.model.findOneAndDelete(filter, options);
     }
 }
 exports.AbstractRepository = AbstractRepository;

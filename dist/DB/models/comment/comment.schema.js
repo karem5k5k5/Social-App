@@ -21,8 +21,21 @@ exports.commentSchema = new mongoose_1.Schema({
             required: true
         }
     ],
+    directParentId: {
+        type: mongoose_1.Schema.Types.ObjectId,
+        ref: "Comment"
+    },
     content: {
         type: String
     },
     reactions: [reaction_schema_1.reactionSchema],
-}, { timestamps: true });
+}, { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } });
+exports.commentSchema.virtual("replies", {
+    ref: "Comment",
+    localField: "_id",
+    foreignField: "parentIds"
+});
+exports.commentSchema.pre("deleteOne", async function (next) {
+    const { _id } = this.getFilter();
+    await this.model.deleteMany({ parentIds: { $in: _id } });
+});

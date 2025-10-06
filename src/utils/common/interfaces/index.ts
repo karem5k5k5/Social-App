@@ -42,6 +42,7 @@ export interface IComment {
     userId: ObjectId
     postId: ObjectId
     parentIds: ObjectId[]
+    directParentId:ObjectId | null
     content: string
     attachment?: IAttachment
     reactions: IReaction[]

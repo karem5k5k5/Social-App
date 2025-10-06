@@ -20,8 +20,23 @@ export const commentSchema = new Schema<IComment>({
             required: true
         }
     ],
+    directParentId: {
+        type: Schema.Types.ObjectId,
+        ref: "Comment"
+    },
     content: {
         type: String
     },
     reactions: [reactionSchema],
-}, { timestamps: true })
+}, { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } })
+
+commentSchema.virtual("replies", {
+    ref: "Comment",
+    localField: "_id",
+    foreignField: "parentIds"
+})
+
+commentSchema.pre("deleteOne", async function (next) {
+    const { _id } = this.getFilter()
+    await this.model.deleteMany({ parentIds: { $in: _id } })
+})

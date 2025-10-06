@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { LoginDTO, RegisterDTO, ResendOtpDTO, VerifyAccountDTO } from "./auth.dto";
+import { LoginDTO, RegisterDTO, ResendOtpDTO, ResetPasswordDTO, VerifyAccountDTO } from "./auth.dto";
 import { GENDER } from "../../utils/common/enums";
 
 export const registerSchema = z.object<RegisterDTO>({
@@ -22,4 +22,10 @@ export const verifyAccountSchema = z.object<VerifyAccountDTO>({
 
 export const resendOTPSchema = z.object<ResendOtpDTO>({
     email: z.email().trim().toLowerCase() as unknown as string
+})
+
+export const resetPasswordSchema = z.object<ResetPasswordDTO>({
+    email: z.email().trim().toLowerCase() as unknown as string,
+    newPassword: z.string().min(6).trim() as unknown as string,
+    otp: z.string().trim().length(5) as unknown as string
 })
