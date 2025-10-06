@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.resendOTPSchema = exports.verifyAccountSchema = exports.loginSchema = exports.registerSchema = void 0;
+exports.resetPasswordSchema = exports.resendOTPSchema = exports.verifyAccountSchema = exports.loginSchema = exports.registerSchema = void 0;
 const zod_1 = require("zod");
 const enums_1 = require("../../utils/common/enums");
 exports.registerSchema = zod_1.z.object({
@@ -20,4 +20,9 @@ exports.verifyAccountSchema = zod_1.z.object({
 });
 exports.resendOTPSchema = zod_1.z.object({
     email: zod_1.z.email().trim().toLowerCase()
+});
+exports.resetPasswordSchema = zod_1.z.object({
+    email: zod_1.z.email().trim().toLowerCase(),
+    newPassword: zod_1.z.string().min(6).trim(),
+    otp: zod_1.z.string().trim().length(5)
 });

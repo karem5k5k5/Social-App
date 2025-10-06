@@ -67,7 +67,7 @@ class AuthService {
         const otp = (0, otp_1.generateOTP)();
         const otpExpire = (0, otp_1.generateExpiryDate)(5 * 60 * 1000);
         // check for email validation
-        const user = await this.userRepository.getOneAndUpdate({ email: resendOtpDTO.email }, { otp, otpExpire });
+        const user = await this.userRepository.getOneAndUpdate({ email: resendOtpDTO.email }, { otp, otpExpire }, { new: true });
         if (!user) {
             throw new errors_1.UnAuthorizedException("invalid email");
         }
@@ -80,6 +80,31 @@ class AuthService {
         });
         // send response
         return res.status(200).json({ success: true, message: "new otp sent successfully" });
+    };
+    resetPassword = async (req, res) => {
+        // get data from req
+        const resetPasswordDTO = req.body;
+        // check user existence
+        const user = await this.userRepository.getOne({ email: resetPasswordDTO.email });
+        if (!user) {
+            throw new errors_1.NotFoundException("user not found");
+        }
+        // check otp & otp expiry date
+        if (user.otp != resetPasswordDTO.otp) {
+            throw new errors_1.ForbiddenException("invalid otp");
+        }
+        if (Number(user.otpExpire) < Date.now()) {
+            throw new errors_1.ForbiddenException("expired otp");
+        }
+        // update user
+        user.password = await (0, hash_1.hashPassword)(resetPasswordDTO.newPassword);
+        user.otp = undefined;
+        user.otpExpire = undefined;
+        user.credentialsUpdatedAt = new Date(Date.now());
+        // save user to db
+        await this.userRepository.create(user);
+        // send reponse
+        return res.status(200).json({ success: true, message: "reset password successfully" });
     };
 }
 exports.default = new AuthService();

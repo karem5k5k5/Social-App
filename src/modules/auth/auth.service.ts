@@ -72,7 +72,7 @@ class AuthService {
         const otp = generateOTP()
         const otpExpire = generateExpiryDate(5 * 60 * 1000)
         // check for email validation
-        const user = await this.userRepository.getOneAndUpdate({ email: resendOtpDTO.email }, { otp, otpExpire })
+        const user = await this.userRepository.getOneAndUpdate({ email: resendOtpDTO.email }, { otp, otpExpire },{new:true})
         if (!user) {
             throw new UnAuthorizedException("invalid email")
         }
@@ -104,8 +104,8 @@ class AuthService {
         }
         // update user
         user.password = await hashPassword(resetPasswordDTO.newPassword)
-        delete user.otp
-        delete user.otpExpire
+        user.otp = undefined
+        user.otpExpire = undefined
         user.credentialsUpdatedAt = new Date(Date.now())
         // save user to db
         await this.userRepository.create(user)
