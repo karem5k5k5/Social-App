@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import { verifyToken } from "../utils/token";
 import { UserRepository } from "../DB/models/user/user.repository";
-import { NotFoundException } from "../utils/errors";
+import { ForbiddenException, NotFoundException } from "../utils/errors";
 
 export const isAuthenticated = async (req: Request, res: Response, next: NextFunction) => {
     // get token from req headers
@@ -13,6 +13,10 @@ export const isAuthenticated = async (req: Request, res: Response, next: NextFun
     const user = await userRepository.getById(id)
     if (!user) {
         throw new NotFoundException("user not found")
+    }
+    // check token validation
+    if (token != user.token) {
+        throw new ForbiddenException("invalid token")
     }
     // add user to req
     req.user = user

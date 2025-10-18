@@ -17,6 +17,10 @@ export interface IUser {
     role: SYS_ROLE
     gender: GENDER
     userAgent: USER_AGENT
+    friendRequests: ObjectId[]
+    friends: ObjectId[]
+    blockedUsers: ObjectId[]
+    token: string
 }
 
 export interface IAttachment {
@@ -35,6 +39,7 @@ export interface IPost {
     content: string
     attachments?: IAttachment[]
     reactions: IReaction[]
+    isFreezed: boolean
 }
 
 export interface IComment {
@@ -42,11 +47,26 @@ export interface IComment {
     userId: ObjectId
     postId: ObjectId
     parentIds: ObjectId[]
-    directParentId:ObjectId | null
+    directParentId: ObjectId | null
     content: string
     attachment?: IAttachment
     reactions: IReaction[]
     mentions?: ObjectId[]
+    isFreezed: boolean
+}
+
+export interface IMessage {
+    _id: ObjectId
+    content: string
+    attachments?: IAttachment[]
+    reactions: IReaction[]
+    sender: ObjectId
+}
+
+export interface IChat {
+    _id: ObjectId
+    users: ObjectId[]
+    messages: ObjectId[]
 }
 
 declare module "express" {

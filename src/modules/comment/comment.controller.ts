@@ -10,5 +10,7 @@ router.post("{/:id}", isValid(createCommentSchema), isAuthenticated, commentServ
 router.get("/:id", commentService.getCommentById)
 router.delete("/:id", isAuthenticated, commentService.deleteComment)
 router.patch("/:id", isAuthenticated, commentService.addReaction)
+router.patch("/freeze/:id", isAuthenticated, commentService.freezeComment)
+router.patch("/restore/:id", isAuthenticated, commentService.restoreComment)
 
 export default router

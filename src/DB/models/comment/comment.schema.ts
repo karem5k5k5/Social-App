@@ -28,6 +28,7 @@ export const commentSchema = new Schema<IComment>({
         type: String
     },
     reactions: [reactionSchema],
+    isFreezed:Boolean
 }, { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } })
 
 commentSchema.virtual("replies", {

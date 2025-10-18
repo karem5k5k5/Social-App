@@ -57,6 +57,25 @@ export const userSchema = new Schema<IUser>({
         enum: USER_AGENT,
         default: USER_AGENT.local
     },
+    friendRequests: [
+        {
+            type: Schema.Types.ObjectId,
+            ref: "User"
+        }
+    ],
+    friends: [
+        {
+            type: Schema.Types.ObjectId,
+            ref: "User"
+        }
+    ],
+    blockedUsers: [
+        {
+            type: Schema.Types.ObjectId,
+            ref: "User"
+        }
+    ],
+    token: String
 
 }, { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } })
 

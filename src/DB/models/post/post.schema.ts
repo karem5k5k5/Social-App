@@ -14,7 +14,8 @@ export const postSchema = new Schema<IPost>({
         required: true,
         trim: true
     },
-    reactions: [reactionSchema]
+    reactions: [reactionSchema],
+    isFreezed: Boolean
 
 }, { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } })
 

@@ -20,6 +20,9 @@ class AbstractRepository {
     async updateOne(filter, update, options) {
         return await this.model.updateOne(filter, update, options);
     }
+    async updateMany(filter, update, options) {
+        return await this.model.updateMany(filter, update, options);
+    }
     async deleteOne(filter, options) {
         return await this.model.deleteOne(filter, options);
     }

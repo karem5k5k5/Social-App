@@ -1,8 +1,8 @@
 import { Request, Response } from "express";
 import { CommnetRepository } from "../../DB/models/comment/comment.repository";
 import { PostRepository } from "../../DB/models/post/post.repository";
-import { NotFoundException, UnAuthorizedException } from "../../utils/errors";
-import { IComment, IPost } from "../../utils/common/interfaces";
+import { ForbiddenException, NotFoundException, UnAuthorizedException } from "../../utils/errors";
+import { IComment, IPost, IUser } from "../../utils/common/interfaces";
 import { CreateCommentDTO } from "./comment.dto";
 import { CommentFactoryService } from "./factory";
 import { addReactionProvider } from "../../utils/common/providers/addreaction.provider";
@@ -16,16 +16,39 @@ class CommentService {
         const { id, postId } = req.params
         const createCommentDTO: CreateCommentDTO = req.body
         // check post existence
-        const post = await this.postRepository.getById(postId)
+        const post = await this.postRepository.getById(postId, {}, {
+            populate: { path: "userId", select: "blockedUsers" }
+        })
         if (!post) {
             throw new NotFoundException("post not found")
+        }
+        // check post freeze
+        if (post.isFreezed) {
+            throw new ForbiddenException("post is freezed")
+        }
+        // check user block
+        const postOwner = post.userId as unknown as IUser
+        if (postOwner.blockedUsers.includes(req.user._id)) {
+            throw new UnAuthorizedException("user is blocked")
         }
         // check (parent) comment existence
         let comment: IComment
         if (id) {
-            comment = await this.commentRepository.getById(id)
+            // check comment existence
+            comment = await this.commentRepository.getById(id, {}, {
+                populate: { path: "userId", select: "blockedUsers" }
+            })
             if (!comment) {
                 throw new NotFoundException("comment not found")
+            }
+            // check comment freeze
+            if (comment.isFreezed) {
+                throw new ForbiddenException("comment is freezed")
+            }
+            // check user block
+            const commentOwner = comment.userId as unknown as IUser
+            if (commentOwner.blockedUsers.includes(req.user._id)) {
+                throw new UnAuthorizedException("user is blocked")
             }
         }
         // prepare data - factory
@@ -47,6 +70,10 @@ class CommentService {
         })
         if (!comment) {
             throw new NotFoundException("comment not found")
+        }
+        // check comment freeze
+        if (comment.isFreezed) {
+            throw new ForbiddenException("comment is freezed")
         }
         // send response
         return res.status(200).json({ success: true, comment })
@@ -83,6 +110,36 @@ class CommentService {
         await addReactionProvider(this.commentRepository, id, userId, reaction)
         // send response
         return res.sendStatus(204)
+    }
+
+    public freezeComment = async (req: Request, res: Response) => {
+        // get id from req params
+        const { id } = req.params
+        // check comment existence
+        const comment = await this.commentRepository.getById(id)
+        if (!comment) {
+            throw new NotFoundException("comment not found")
+        }
+        // update comment
+        comment.isFreezed = true
+        await this.commentRepository.create(comment)
+        // send response
+        return res.status(200).json({ success: true, message: "comment freezed successfully" })
+    }
+
+    public restoreComment = async (req: Request, res: Response) => {
+        // get id from req params
+        const { id } = req.params
+        // check comment existence
+        const comment = await this.commentRepository.getById(id)
+        if (!comment) {
+            throw new NotFoundException("comment not found")
+        }
+        // update comment
+        comment.isFreezed = false
+        await this.commentRepository.create(comment)
+        // send response
+        return res.status(200).json({ success: true, message: "comment restored successfully" })
     }
 }
 

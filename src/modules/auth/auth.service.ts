@@ -61,6 +61,8 @@ class AuthService {
         }
         // generate token
         const token = generateToken(user.id, { expiresIn: "1h" })
+        // save token into db
+        await this.userRepository.updateOne({ email: loginDTO.email }, { token })
         // send response
         return res.status(200).json({ success: true, message: "login successfully", token })
     }
@@ -72,7 +74,7 @@ class AuthService {
         const otp = generateOTP()
         const otpExpire = generateExpiryDate(5 * 60 * 1000)
         // check for email validation
-        const user = await this.userRepository.getOneAndUpdate({ email: resendOtpDTO.email }, { otp, otpExpire },{new:true})
+        const user = await this.userRepository.getOneAndUpdate({ email: resendOtpDTO.email }, { otp, otpExpire }, { new: true })
         if (!user) {
             throw new UnAuthorizedException("invalid email")
         }
@@ -87,19 +89,19 @@ class AuthService {
         return res.status(200).json({ success: true, message: "new otp sent successfully" })
     }
 
-    resetPassword = async (req: Request, res: Response)=>{
+    resetPassword = async (req: Request, res: Response) => {
         // get data from req
-        const resetPasswordDTO:ResetPasswordDTO = req.body
+        const resetPasswordDTO: ResetPasswordDTO = req.body
         // check user existence
-        const user = await this.userRepository.getOne({email:resetPasswordDTO.email})
-        if (!user){
+        const user = await this.userRepository.getOne({ email: resetPasswordDTO.email })
+        if (!user) {
             throw new NotFoundException("user not found")
         }
         // check otp & otp expiry date
-        if (user.otp != resetPasswordDTO.otp){
+        if (user.otp != resetPasswordDTO.otp) {
             throw new ForbiddenException("invalid otp")
         }
-        if (Number(user.otpExpire) < Date.now()){
+        if (Number(user.otpExpire) < Date.now()) {
             throw new ForbiddenException("expired otp")
         }
         // update user
@@ -107,10 +109,18 @@ class AuthService {
         user.otp = undefined
         user.otpExpire = undefined
         user.credentialsUpdatedAt = new Date(Date.now())
+        user.token = ""
         // save user to db
         await this.userRepository.create(user)
         // send reponse
         return res.status(200).json({ success: true, message: "reset password successfully" })
+    }
+
+    logout = async (req: Request, res: Response) => {
+        // remove token from db
+        await this.userRepository.updateOne({ _id: req.user._id }, { token: "" })
+        // send response
+        return res.status(200).json({ success: true, message: "logout successfully" })
     }
 }
 

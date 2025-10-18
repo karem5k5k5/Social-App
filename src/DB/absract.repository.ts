@@ -1,4 +1,4 @@
-import { Model, MongooseBaseQueryOptions, MongooseUpdateQueryOptions, ProjectionType, QueryOptions, RootFilterQuery, UpdateQuery } from "mongoose";
+import { Document, Model, MongooseBaseQueryOptions, MongooseUpdateQueryOptions, ProjectionType, QueryOptions, RootFilterQuery, UpdateQuery } from "mongoose";
 
 // repository design pattern
 export abstract class AbstractRepository<T> {
@@ -6,7 +6,8 @@ export abstract class AbstractRepository<T> {
 
     async create(item: Partial<T>) {
         const doc = new this.model(item)
-        return await doc.save()
+        doc["isNew"] = true
+        return await doc.save() as Document<T>
     }
 
     async getOne(filter: RootFilterQuery<T>, projection?: ProjectionType<T>, options?: QueryOptions<T>) {
@@ -19,6 +20,10 @@ export abstract class AbstractRepository<T> {
 
     async updateOne(filter: RootFilterQuery<T>, update: UpdateQuery<T>, options?: MongooseUpdateQueryOptions<T>) {
         return await this.model.updateOne(filter, update, options)
+    }
+
+    async updateMany(filter: RootFilterQuery<T>, update: UpdateQuery<T>, options?: MongooseUpdateQueryOptions<T>) {
+        return await this.model.updateMany(filter, update, options)
     }
 
     async deleteOne(filter: RootFilterQuery<T>, options?: MongooseBaseQueryOptions<T>) {

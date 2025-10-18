@@ -3,7 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.addReactionProvider = void 0;
 const errors_1 = require("../../errors");
 const addReactionProvider = async (repo, id, userId, reaction) => {
-    // check post existence
+    // check content existence
     const content = await repo.getById(id);
     if (!content) {
         throw new errors_1.NotFoundException("content not found");

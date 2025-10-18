@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import { CreatePostDTO } from "./post.dto";
 import { PostFactoryService } from "./factory";
 import { PostRepository } from "../../DB/models/post/post.repository";
-import { NotFoundException, UnAuthorizedException } from "../../utils/errors";
+import { ForbiddenException, NotFoundException, UnAuthorizedException } from "../../utils/errors";
 import { addReactionProvider } from "../../utils/common/providers/addreaction.provider";
 
 export class PostService {
@@ -45,6 +45,10 @@ export class PostService {
         if (!post) {
             throw new NotFoundException("post not found")
         }
+        // check post freeze
+        if (post.isFreezed) {
+            throw new ForbiddenException("post is freezed")
+        }
         // send response
         return res.status(200).json({ success: true, post })
     }
@@ -65,6 +69,36 @@ export class PostService {
         await this.postRepository.deleteOne({ _id: id })
         // send response
         return res.status(200).json({ success: true, message: "post deleted successfully" })
+    }
+
+    public freezePost = async (req: Request, res: Response) => {
+        // get id from req params
+        const { id } = req.params
+        // check post existence
+        const post = await this.postRepository.getById(id)
+        if (!post) {
+            throw new NotFoundException("post not found")
+        }
+        // update post
+        post.isFreezed = true
+        await this.postRepository.create(post)
+        // send response
+        return res.status(200).json({ success: true, message: "post freezed successfully" })
+    }
+
+    public restorePost = async (req: Request, res: Response) => {
+        // get id from req params
+        const { id } = req.params
+        // check post existence
+        const post = await this.postRepository.getById(id)
+        if (!post) {
+            throw new NotFoundException("post not found")
+        }
+        // update post
+        post.isFreezed = false
+        await this.postRepository.create(post)
+        // send response
+        return res.status(200).json({ success: true, message: "post restored successfully" })
     }
 }
 
