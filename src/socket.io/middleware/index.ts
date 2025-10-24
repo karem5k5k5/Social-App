@@ -1,7 +1,8 @@
 import { Socket } from "socket.io"
 import { verifyToken } from "../../utils/token"
 import { UserRepository } from "../../DB/models/user/user.repository"
-import { NotFoundException } from "../../utils/errors"
+import { BadRequestException, NotFoundException } from "../../utils/errors"
+import { ZodType } from "zod"
 
 export const socketAuth = async (socket: Socket, next: Function) => {
     try {
@@ -21,5 +22,24 @@ export const socketAuth = async (socket: Socket, next: Function) => {
         next()
     } catch (error) {
         next(error)
+    }
+}
+
+export const messageValidation = (schema: ZodType) => {
+    return (socket: Socket, next: Function) => {
+        try {
+            let data = socket.data
+            const { success, error } = schema.safeParse(data)
+            if (!success) {
+                let errMessages = error.issues.map((isssue) => ({
+                    path: isssue.path[0],
+                    message: isssue.message
+                }))
+                throw new BadRequestException("validation error", errMessages)
+            }
+            next()
+        } catch (error) {
+            next(error)
+        }
     }
 }

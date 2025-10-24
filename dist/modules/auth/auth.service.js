@@ -57,6 +57,8 @@ class AuthService {
         }
         // generate token
         const token = (0, token_1.generateToken)(user.id, { expiresIn: "1h" });
+        // save token into db
+        await this.userRepository.updateOne({ email: loginDTO.email }, { token });
         // send response
         return res.status(200).json({ success: true, message: "login successfully", token });
     };
@@ -101,10 +103,17 @@ class AuthService {
         user.otp = undefined;
         user.otpExpire = undefined;
         user.credentialsUpdatedAt = new Date(Date.now());
+        user.token = "";
         // save user to db
         await this.userRepository.create(user);
         // send reponse
         return res.status(200).json({ success: true, message: "reset password successfully" });
+    };
+    logout = async (req, res) => {
+        // remove token from db
+        await this.userRepository.updateOne({ _id: req.user._id }, { token: "" });
+        // send response
+        return res.status(200).json({ success: true, message: "logout successfully" });
     };
 }
 exports.default = new AuthService();

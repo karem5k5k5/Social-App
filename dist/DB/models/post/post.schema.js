@@ -15,7 +15,8 @@ exports.postSchema = new mongoose_1.Schema({
         required: true,
         trim: true
     },
-    reactions: [reaction_schema_1.reactionSchema]
+    reactions: [reaction_schema_1.reactionSchema],
+    isFreezed: Boolean
 }, { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } });
 exports.postSchema.virtual("comments", {
     localField: "_id",

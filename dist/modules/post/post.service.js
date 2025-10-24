@@ -42,6 +42,10 @@ class PostService {
         if (!post) {
             throw new errors_1.NotFoundException("post not found");
         }
+        // check post freeze
+        if (post.isFreezed) {
+            throw new errors_1.ForbiddenException("post is freezed");
+        }
         // send response
         return res.status(200).json({ success: true, post });
     };
@@ -61,6 +65,34 @@ class PostService {
         await this.postRepository.deleteOne({ _id: id });
         // send response
         return res.status(200).json({ success: true, message: "post deleted successfully" });
+    };
+    freezePost = async (req, res) => {
+        // get id from req params
+        const { id } = req.params;
+        // check post existence
+        const post = await this.postRepository.getById(id);
+        if (!post) {
+            throw new errors_1.NotFoundException("post not found");
+        }
+        // update post
+        post.isFreezed = true;
+        await this.postRepository.create(post);
+        // send response
+        return res.status(200).json({ success: true, message: "post freezed successfully" });
+    };
+    restorePost = async (req, res) => {
+        // get id from req params
+        const { id } = req.params;
+        // check post existence
+        const post = await this.postRepository.getById(id);
+        if (!post) {
+            throw new errors_1.NotFoundException("post not found");
+        }
+        // update post
+        post.isFreezed = false;
+        await this.postRepository.create(post);
+        // send response
+        return res.status(200).json({ success: true, message: "post restored successfully" });
     };
 }
 exports.PostService = PostService;

@@ -14,16 +14,39 @@ class CommentService {
         const { id, postId } = req.params;
         const createCommentDTO = req.body;
         // check post existence
-        const post = await this.postRepository.getById(postId);
+        const post = await this.postRepository.getById(postId, {}, {
+            populate: { path: "userId", select: "blockedUsers" }
+        });
         if (!post) {
             throw new errors_1.NotFoundException("post not found");
+        }
+        // check post freeze
+        if (post.isFreezed) {
+            throw new errors_1.ForbiddenException("post is freezed");
+        }
+        // check user block
+        const postOwner = post.userId;
+        if (postOwner.blockedUsers.includes(req.user._id)) {
+            throw new errors_1.UnAuthorizedException("user is blocked");
         }
         // check (parent) comment existence
         let comment;
         if (id) {
-            comment = await this.commentRepository.getById(id);
+            // check comment existence
+            comment = await this.commentRepository.getById(id, {}, {
+                populate: { path: "userId", select: "blockedUsers" }
+            });
             if (!comment) {
                 throw new errors_1.NotFoundException("comment not found");
+            }
+            // check comment freeze
+            if (comment.isFreezed) {
+                throw new errors_1.ForbiddenException("comment is freezed");
+            }
+            // check user block
+            const commentOwner = comment.userId;
+            if (commentOwner.blockedUsers.includes(req.user._id)) {
+                throw new errors_1.UnAuthorizedException("user is blocked");
             }
         }
         // prepare data - factory
@@ -44,6 +67,10 @@ class CommentService {
         });
         if (!comment) {
             throw new errors_1.NotFoundException("comment not found");
+        }
+        // check comment freeze
+        if (comment.isFreezed) {
+            throw new errors_1.ForbiddenException("comment is freezed");
         }
         // send response
         return res.status(200).json({ success: true, comment });
@@ -78,6 +105,34 @@ class CommentService {
         await (0, addreaction_provider_1.addReactionProvider)(this.commentRepository, id, userId, reaction);
         // send response
         return res.sendStatus(204);
+    };
+    freezeComment = async (req, res) => {
+        // get id from req params
+        const { id } = req.params;
+        // check comment existence
+        const comment = await this.commentRepository.getById(id);
+        if (!comment) {
+            throw new errors_1.NotFoundException("comment not found");
+        }
+        // update comment
+        comment.isFreezed = true;
+        await this.commentRepository.create(comment);
+        // send response
+        return res.status(200).json({ success: true, message: "comment freezed successfully" });
+    };
+    restoreComment = async (req, res) => {
+        // get id from req params
+        const { id } = req.params;
+        // check comment existence
+        const comment = await this.commentRepository.getById(id);
+        if (!comment) {
+            throw new errors_1.NotFoundException("comment not found");
+        }
+        // update comment
+        comment.isFreezed = false;
+        await this.commentRepository.create(comment);
+        // send response
+        return res.status(200).json({ success: true, message: "comment restored successfully" });
     };
 }
 exports.default = new CommentService();

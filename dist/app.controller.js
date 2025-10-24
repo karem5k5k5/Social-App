@@ -8,8 +8,11 @@ const auth_controller_1 = __importDefault(require("./modules/auth/auth.controlle
 const post_controller_1 = __importDefault(require("./modules/post/post.controller"));
 const comment_controller_1 = __importDefault(require("./modules/comment/comment.controller"));
 const user_controller_1 = __importDefault(require("./modules/user/user.controller"));
+const chat_controller_1 = __importDefault(require("./modules/chat/chat.controller"));
 const connection_1 = require("./DB/connection");
 const global_error_handler_1 = require("./utils/global-error-handler");
+const express_1 = require("graphql-http/lib/use/express");
+const app_schema_1 = require("./app.schema");
 function bootstrap(app, express) {
     // database connection
     (0, connection_1.connectDB)();
@@ -24,7 +27,24 @@ function bootstrap(app, express) {
     app.use("/post", post_controller_1.default);
     // comment
     app.use("/comment", comment_controller_1.default);
-    // message
+    // chat
+    app.use("/chat", chat_controller_1.default);
+    // graphql
+    app.all("/graphql", (0, express_1.createHandler)({
+        schema: app_schema_1.appSchema,
+        formatError: (error) => {
+            return {
+                success: false,
+                message: error.message,
+                path: error.path,
+                details: error.originalError
+            };
+        },
+        context: (req) => {
+            const token = req.headers["authorization"];
+            return { token };
+        }
+    }));
     // invalid
     app.use("/{*dummy}", (req, res) => {
         return res.status(404).json({ success: false, message: "invalid router" });

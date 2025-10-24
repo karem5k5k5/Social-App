@@ -29,6 +29,7 @@ exports.commentSchema = new mongoose_1.Schema({
         type: String
     },
     reactions: [reaction_schema_1.reactionSchema],
+    isFreezed: Boolean
 }, { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } });
 exports.commentSchema.virtual("replies", {
     ref: "Comment",

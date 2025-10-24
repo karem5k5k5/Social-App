@@ -1,12 +1,12 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.isAuthenticated = void 0;
-const token_1 = require("../utils/token");
-const user_repository_1 = require("../DB/models/user/user.repository");
-const errors_1 = require("../utils/errors");
-const isAuthenticated = async (req, res, next) => {
-    // get token from req headers
-    const token = req.headers.authorization;
+exports.graphqlAuthenticate = void 0;
+const user_repository_1 = require("../../DB/models/user/user.repository");
+const errors_1 = require("../../utils/errors");
+const token_1 = require("../../utils/token");
+const graphqlAuthenticate = async (context) => {
+    // get token from graphql conntext
+    const token = context.token;
     // verify token and get user id
     const { id } = (0, token_1.verifyToken)(token);
     // check user existence
@@ -19,9 +19,7 @@ const isAuthenticated = async (req, res, next) => {
     if (token != user.token) {
         throw new errors_1.ForbiddenException("invalid token");
     }
-    // add user to req
-    req.user = user;
-    // call next
-    next();
+    // add user to context
+    context.user = user;
 };
-exports.isAuthenticated = isAuthenticated;
+exports.graphqlAuthenticate = graphqlAuthenticate;

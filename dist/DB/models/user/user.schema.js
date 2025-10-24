@@ -76,6 +76,7 @@ exports.userSchema = new mongoose_1.Schema({
             ref: "User"
         }
     ],
+    token: String
 }, { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } });
 // virtual field
 exports.userSchema.virtual("fullName").get(function () {

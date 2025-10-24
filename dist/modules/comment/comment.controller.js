@@ -13,4 +13,6 @@ router.post("{/:id}", (0, validation_middleware_1.isValid)(comment_validation_1.
 router.get("/:id", comment_service_1.default.getCommentById);
 router.delete("/:id", auth_middleware_1.isAuthenticated, comment_service_1.default.deleteComment);
 router.patch("/:id", auth_middleware_1.isAuthenticated, comment_service_1.default.addReaction);
+router.patch("/freeze/:id", auth_middleware_1.isAuthenticated, comment_service_1.default.freezeComment);
+router.patch("/restore/:id", auth_middleware_1.isAuthenticated, comment_service_1.default.restoreComment);
 exports.default = router;
