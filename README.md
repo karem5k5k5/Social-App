@@ -4,3 +4,4 @@ is designed as modular monolith & clean architecture approaches leveraging abstr
 3 different API approaches implemented :-
 ● REST
 ● GraphQl
+● WebSockets
