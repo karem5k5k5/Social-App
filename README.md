@@ -48,6 +48,7 @@ src/
 ├── utils/
 ├── config/
 └── app.controller.ts
+```
 
 This keeps domain-specific code close together and makes the system easier to extend and maintain.
 
@@ -74,16 +75,16 @@ This structure makes the business logic less dependent on Express and Mongoose i
 
 The authentication module implements:
 
--  User registration 
--  Password hashing with `bcrypt` 
--  Email verification through OTP 
--  OTP expiration 
--  Login with JWT 
--  Logout 
--  OTP regeneration 
--  Password reset 
--  Credential update timestamps 
--  Account verification state 
+- User registration 
+- Password hashing with `bcrypt` 
+- Email verification through OTP 
+- OTP expiration 
+- Login with JWT 
+- Logout 
+- OTP regeneration 
+- Password reset 
+- Credential update timestamps 
+- Account verification state 
 
 Authentication is shared across HTTP, GraphQL, and Socket.IO contexts.
 
@@ -91,11 +92,11 @@ Authentication is shared across HTTP, GraphQL, and Socket.IO contexts.
 
 Authenticated users can:
 
--  Send friend requests 
--  Accept friend requests 
--  Reject friend requests 
--  Block users 
--  Unfriend users 
+- Send friend requests 
+- Accept friend requests 
+- Reject friend requests 
+- Block users 
+- Unfriend users 
 
 The application also checks blocking relationships before allowing interactions such as comments, reactions, and chat messages.
 
@@ -103,12 +104,12 @@ The application also checks blocking relationships before allowing interactions 
 
 Users can:
 
--  Create posts 
--  Retrieve posts 
--  Delete their own posts 
--  React to posts 
--  Freeze posts 
--  Restore posts 
+- Create posts 
+- Retrieve posts 
+- Delete their own posts 
+- React to posts 
+- Freeze posts 
+- Restore posts 
 
 Posts maintain their reactions and expose related comments through MongoDB relationships/virtuals.
 
@@ -118,11 +119,11 @@ The comment system supports threaded conversations.
 
 A comment can contain:
 
--  A direct parent comment 
--  A list of parent IDs for its ancestry 
--  Replies 
--  Reactions 
--  Freeze/restore state 
+- A direct parent comment 
+- A list of parent IDs for its ancestry 
+- Replies 
+- Reactions 
+- Freeze/restore state 
 
 This allows the application to represent nested comment trees rather than only flat comments.
 
@@ -132,18 +133,18 @@ Posts and comments share reusable reaction logic.
 
 Supported reactions include:
 
--  Like 
--  Love 
--  Care 
--  Angry 
--  Sad 
--  Wow 
+- Like 
+- Love 
+- Care 
+- Angry 
+- Sad 
+- Wow 
 
 A user can:
 
--  Add a reaction 
--  Change their existing reaction 
--  Remove their reaction 
+- Add a reaction 
+- Change their existing reaction 
+- Remove their reaction 
 
 Reaction handling is extracted into a reusable provider instead of duplicating the same logic in multiple services.
 
@@ -153,22 +154,19 @@ The application uses **Socket.IO** for real-time communication.
 
 The chat flow includes:
 
-1.  Authenticate the socket connection 
-2.  Associate the connected user with their socket 
-3.  Validate message data 
-4.  Check blocking relationships 
-5.  Deliver the message to the recipient in real time 
-6.  Persist the message in MongoDB 
-7.  Create or update the corresponding chat document 
+1. Authenticate the socket connection 
+2. Associate the connected user with their socket 
+3. Validate message data 
+4. Check blocking relationships 
+5. Deliver the message to the recipient in real time 
+6. Persist the message in MongoDB 
+7. Create or update the corresponding chat document 
 
 A connected-user map is maintained in memory to route messages directly to currently connected recipients.
 
 Example Socket.IO events:
 
-```
-```
-
-```
+```text
 sendMessage
 successMessage
 receiveMessage
@@ -179,10 +177,7 @@ failMessage
 
 The application exposes REST endpoints for the main application domains:
 
-```
-```
-
-```
+```text
 /auth
 /user
 /post
@@ -194,21 +189,18 @@ The application exposes REST endpoints for the main application domains:
 
 The application also exposes a GraphQL endpoint:
 
-```
-```
-
-```
+```text
 /graphql
 ```
 
 The current GraphQL implementation demonstrates:
 
--  GraphQL schema definition 
--  Custom GraphQL object types 
--  Query resolvers 
--  GraphQL-specific validation 
--  Authentication through request context 
--  Reuse of repository/data-access logic 
+- GraphQL schema definition 
+- Custom GraphQL object types 
+- Query resolvers 
+- GraphQL-specific validation 
+- Authentication through request context 
+- Reuse of repository/data-access logic 
 
 REST and GraphQL therefore coexist within the same backend.
 
@@ -218,34 +210,31 @@ REST and GraphQL therefore coexist within the same backend.
 
 A simplified request flow looks like this:
 
-```
-```
-
-```
+```text
                    ┌──────────────────┐
-                   │     Client       │
+                   │      Client      │
                    └────────┬─────────┘
                             │
               ┌─────────────┼─────────────┐
               │             │             │
               ▼             ▼             ▼
-         REST API       GraphQL       Socket.IO
+           REST API      GraphQL      Socket.IO
               │             │             │
               └─────────────┼─────────────┘
                             ▼
-                    Authentication /
-                     Validation
+                     Authentication /
+                        Validation
                             │
                             ▼
                        Controllers
                             │
                             ▼
-                         Services
+                        Services
                             │
                 ┌───────────┴───────────┐
                 │                       │
                 ▼                       ▼
-             Factories             Providers
+            Factories               Providers
                 │                       │
                 └───────────┬───────────┘
                             ▼
@@ -263,19 +252,13 @@ The real-time chat path additionally uses Socket.IO's connection middleware and 
 
 Database access is abstracted through a reusable repository base class:
 
-```
-```
-
-```
+```text
 AbstractRepository<T>
 ```
 
 The abstraction provides common operations such as:
 
-```
-```
-
-```
+```text
 create
 getOne
 getById
@@ -289,10 +272,7 @@ getOneAndDelete
 
 Domain-specific repositories then extend this abstraction:
 
-```
-```
-
-```
+```text
 UserRepository
 PostRepository
 CommentRepository
@@ -310,10 +290,7 @@ Factories are used to construct domain objects before persistence.
 
 Examples include:
 
-```
-```
-
-```
+```text
 AuthFactoryService
 PostFactoryService
 CommentFactoryService
@@ -332,18 +309,15 @@ The project uses **Zod** for runtime validation.
 
 Validation is applied to:
 
--  Request bodies 
--  Route parameters 
--  Query parameters 
--  GraphQL arguments 
--  Socket.IO message data 
+- Request bodies 
+- Route parameters 
+- Query parameters 
+- GraphQL arguments 
+- Socket.IO message data 
 
 Example flow:
 
-```
-```
-
-```
+```text
 Request
    │
    ▼
@@ -362,10 +336,7 @@ Validation errors are normalized into application-specific error responses.
 
 The application defines a custom error hierarchy:
 
-```
-```
-
-```
+```text
 AppError
 ├── BadRequestException
 ├── UnAuthorizedException
@@ -386,10 +357,7 @@ MongoDB is accessed through **Mongoose**.
 
 Main models include:
 
-```
-```
-
-```
+```text
 User
 Post
 Comment
@@ -401,21 +369,21 @@ Relationships are represented with MongoDB references.
 
 Examples:
 
--  Posts reference their users 
--  Comments reference users and posts 
--  Comments can reference parent comments 
--  Chats contain participating users 
--  Chats contain message references 
--  Reactions contain the reacting user's ID 
+- Posts reference their users 
+- Comments reference users and posts 
+- Comments can reference parent comments 
+- Chats contain participating users 
+- Chats contain message references 
+- Reactions contain the reacting user's ID 
 
 The project also uses Mongoose features such as:
 
--  Schemas 
--  References 
+- Schemas 
+- References 
 - `populate` 
--  Virtual fields 
--  Middleware/hooks 
--  Timestamps 
+- Virtual fields 
+- Middleware/hooks 
+- Timestamps 
 
 ---
 
@@ -423,10 +391,7 @@ The project also uses Mongoose features such as:
 
 A typical registration flow is:
 
-```
-```
-
-```
+```text
 Register
    │
    ▼
@@ -465,38 +430,35 @@ OTP generation and expiration are isolated in reusable utility functions.
 
 The application uses JWT-based authentication.
 
-```
-```
-
-```
+```text
 Login
-  │
-  ▼
+ │
+ ▼
 Validate credentials
-  │
-  ▼
+ │
+ ▼
 Compare password hash
-  │
-  ▼
+ │
+ ▼
 Check account verification
-  │
-  ▼
+ │
+ ▼
 Generate JWT
-  │
-  ▼
+ │
+ ▼
 Persist token
-  │
-  ▼
+ │
+ ▼
 Return token
 ```
 
 Protected REST endpoints use authentication middleware to:
 
-1.  Read the authorization token 
-2.  Verify the JWT 
-3.  Resolve the user 
-4.  Validate the stored token 
-5.  Attach the authenticated user to the request 
+1. Read the authorization token 
+2. Verify the JWT 
+3. Resolve the user 
+4. Validate the stored token 
+5. Attach the authenticated user to the request 
 
 The same general authentication concept is also used by GraphQL and Socket.IO.
 
@@ -506,10 +468,7 @@ The same general authentication concept is also used by GraphQL and Socket.IO.
 
 The Socket.IO implementation maintains an in-memory map:
 
-```
-```
-
-```
+```text
 Map<UserId, SocketId>
 ```
 
@@ -517,40 +476,34 @@ This allows the server to determine whether a recipient is currently connected a
 
 Simplified flow:
 
-```
-```
-
-```
+```text
 Sender
-  │
-  │ sendMessage
-  ▼
+ │
+ │ sendMessage
+ ▼
 Socket.IO Server
-  │
-  ├── authenticate socket
-  │
-  ├── validate message
-  │
-  ├── check blocked users
-  │
-  ├── emit to sender
-  │
-  ├── emit to recipient
-  │
-  └── persist message
-          │
-          ▼
-       MongoDB
+ │
+ ├── authenticate socket
+ │
+ ├── validate message
+ │
+ ├── check blocked users
+ │
+ ├── emit to sender
+ │
+ ├── emit to recipient
+ │
+ └── persist message
+           │
+           ▼
+         MongoDB
 ```
 
 ---
 
 ## Project Structure
 
-```
-```
-
-```
+```text
 src/
 │
 ├── config/
@@ -644,46 +597,46 @@ src/
 
 ### Backend
 
--  Node.js 
--  Express 
--  TypeScript 
+- Node.js 
+- Express 
+- TypeScript 
 
 ### Database
 
--  MongoDB 
--  Mongoose 
+- MongoDB 
+- Mongoose 
 
 ### APIs
 
--  REST 
--  GraphQL 
+- REST 
+- GraphQL 
 
 ### Real-Time Communication
 
--  Socket.IO 
+- Socket.IO 
 
 ### Authentication & Security
 
--  JSON Web Tokens (JWT) 
--  bcrypt 
+- JSON Web Tokens (JWT) 
+- bcrypt 
 
 ### Validation
 
--  Zod 
+- Zod 
 
 ### Email
 
--  Nodemailer 
+- Nodemailer 
 
 ### Architecture / Design Techniques
 
--  Modular architecture 
--  Repository pattern 
--  Factory pattern 
--  Provider abstraction 
--  DTOs 
--  Middleware-based cross-cutting concerns 
--  Custom application error hierarchy 
+- Modular architecture 
+- Repository pattern 
+- Factory pattern 
+- Provider abstraction 
+- DTOs 
+- Middleware-based cross-cutting concerns 
+- Custom application error hierarchy 
 
 ---
 
@@ -693,26 +646,20 @@ src/
 
 Make sure you have the following installed:
 
--  Node.js 
--  npm 
--  MongoDB 
+- Node.js 
+- npm 
+- MongoDB 
 
 ### Clone the repository
 
-```
-```
-
-```
+```text
 git clone https://github.com/karem5k5k5/Social-App.git
 cd Social-App
 ```
 
 ### Install dependencies
 
-```
-```
-
-```
+```text
 npm install
 ```
 
@@ -720,10 +667,7 @@ npm install
 
 Create a `.env` file in the project root:
 
-```
-```
-
-```
+```text
 PORT=3000
 DB_URL=your_mongodb_connection_string
 NODEMAILER_EMAIL=your_email
@@ -733,19 +677,13 @@ JWT_SECRET=your_jwt_secret
 
 ### Start the development server
 
-```
-```
-
-```
+```text
 npm run dev
 ```
 
 The server will start on:
 
-```
-```
-
-```
+```text
 http://localhost:3000
 ```
 
@@ -755,10 +693,7 @@ http://localhost:3000
 
 ### Authentication
 
-```
-```
-
-```
+```text
 POST   /auth/register
 POST   /auth/verify-account
 POST   /auth/login
@@ -769,10 +704,7 @@ POST   /auth/logout
 
 ### Users
 
-```
-```
-
-```
+```text
 GET    /user/:id
 PATCH  /user/update
 POST   /user/send-friend-request/:friendId
@@ -784,10 +716,7 @@ DELETE /user/unfriend/:id
 
 ### Posts
 
-```
-```
-
-```
+```text
 POST   /post
 GET    /post/:id
 PATCH  /post/:id
@@ -798,10 +727,7 @@ DELETE /post/:id
 
 ### Comments
 
-```
-```
-
-```
+```text
 POST   /post/:postId/comment
 POST   /post/:postId/comment/:id
 GET    /post/:postId/comment/:id
@@ -813,19 +739,13 @@ DELETE /post/:postId/comment/:id
 
 ### Chat
 
-```
-```
-
-```
+```text
 GET /chat/:userId
 ```
 
 ### GraphQL
 
-```
-```
-
-```
+```text
 POST /graphql
 ```
 
@@ -857,20 +777,20 @@ Authentication and validation are implemented as reusable middleware layers acro
 
 This project focuses on backend engineering concepts that go beyond basic API development:
 
--  Designing a modular backend 
--  Structuring a growing TypeScript codebase 
--  Separating business logic from persistence 
--  Designing MongoDB relationships 
--  Implementing authentication and authorization 
--  Handling OTP-based account verification 
--  Building nested data structures 
--  Reusing business logic across multiple domains 
--  Building REST APIs 
--  Adding GraphQL to an existing backend 
--  Implementing real-time communication with WebSockets/Socket.IO 
--  Validating untrusted input at multiple boundaries 
--  Creating centralized application error handling 
--  Designing reusable repository abstractions 
+- Designing a modular backend 
+- Structuring a growing TypeScript codebase 
+- Separating business logic from persistence 
+- Designing MongoDB relationships 
+- Implementing authentication and authorization 
+- Handling OTP-based account verification 
+- Building nested data structures 
+- Reusing business logic across multiple domains 
+- Building REST APIs 
+- Adding GraphQL to an existing backend 
+- Implementing real-time communication with WebSockets/Socket.IO 
+- Validating untrusted input at multiple boundaries 
+- Creating centralized application error handling 
+- Designing reusable repository abstractions 
 
 ---
 
@@ -878,18 +798,18 @@ This project focuses on backend engineering concepts that go beyond basic API de
 
 Potential extensions to the project include:
 
--  Refresh-token based authentication 
--  Rate limiting for authentication and OTP endpoints 
--  Centralized production configuration 
--  Automated test coverage 
--  API documentation with OpenAPI/Swagger 
--  Pagination and cursor-based pagination 
--  More comprehensive authorization policies 
--  Message delivery/read status 
--  Online/offline presence tracking 
--  Redis-backed Socket.IO scaling 
--  Background jobs for emails and notifications 
--  Docker-based development and deployment 
--  CI/CD pipeline 
--  More comprehensive GraphQL coverage 
--  Production-grade logging and monitoring 
+- Refresh-token based authentication 
+- Rate limiting for authentication and OTP endpoints 
+- Centralized production configuration 
+- Automated test coverage 
+- API documentation with OpenAPI/Swagger 
+- Pagination and cursor-based pagination 
+- More comprehensive authorization policies 
+- Message delivery/read status 
+- Online/offline presence tracking 
+- Redis-backed Socket.IO scaling 
+- Background jobs for emails and notifications 
+- Docker-based development and deployment 
+- CI/CD pipeline 
+- More comprehensive GraphQL coverage 
+- Production-grade logging and monitoring 
